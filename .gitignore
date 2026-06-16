@@ -1,0 +1,6 @@
+# Proprietary KakaoTalk installer — never commit (copyright)
+*.exe
+
+# Wine prefix
+.wine/
+*.log

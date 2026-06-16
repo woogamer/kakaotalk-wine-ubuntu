@@ -1,0 +1,27 @@
+REGEDIT4
+
+[HKEY_LOCAL_MACHINE\Software\Microsoft\Windows NT\CurrentVersion\FontSubstitutes]
+"MS Shell Dlg"="NanumGothic"
+"MS Shell Dlg 2"="NanumGothic"
+"MS UI Gothic"="NanumGothic"
+"Gulim"="NanumGothic"
+"Dotum"="NanumGothic"
+"Batang"="NanumGothic"
+"Malgun Gothic"="NanumGothic"
+
+[HKEY_CURRENT_USER\Software\Wine\Fonts\Replacements]
+"Batang"="NanumGothic"
+"BatangChe"="NanumGothic"
+"Dotum"="NanumGothic"
+"DotumChe"="NanumGothic"
+"Gulim"="NanumGothic"
+"GulimChe"="NanumGothic"
+"Gungsuh"="NanumGothic"
+"GungsuhChe"="NanumGothic"
+"Malgun Gothic"="NanumGothic"
+"MS Gothic"="NanumGothic"
+"MS PGothic"="NanumGothic"
+"MS UI Gothic"="NanumGothic"
+"Meiryo"="NanumGothic"
+"SimSun"="NanumGothic"
+"PMingLiU"="NanumGothic"
