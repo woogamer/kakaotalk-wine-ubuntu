@@ -38,6 +38,7 @@ chmod +x install.sh kakaotalk.sh kakao-restart.sh
 | `install.sh` | 한 번에 설치: `ko_KR.UTF-8` locale, 32비트 prefix, 나눔폰트, 사일런트 설치 |
 | `kakaotalk.sh` | 한글 입력에 필요한 **ibus** IME 환경변수를 세팅한 실행 스크립트 |
 | `kakao-restart.sh` | 검은/짤린 창 글리치 복구용 클린 재시작 (`wineserver -k` + 재실행) |
+| `fix-hangul-key.sh` | **시스템 전체** 한영키(Right Alt)가 안 먹힐 때 ibus-hangul 설정 복구 |
 | `nanum_font.reg` | 두부(□) 대신 한글이 렌더링되도록 하는 폰트 치환 |
 
 ## 왜 32비트 prefix인가
@@ -83,6 +84,48 @@ export XMODIFIERS=@im=ibus
 
 시스템이 ibus로 도는데 카카오톡만 fcitx 환경변수로 실행하면 카카오톡 안에서
 입력이 실패합니다. 이 값들은 `ibus`로 유지하세요.
+
+## 한영키(Right Alt)가 시스템 전체에서 안 먹힐 때
+
+> 위 트러블슈팅이 "카카오톡에서만" 입력이 안 되는 경우라면, 이건 **반대 케이스**입니다.
+> 카카오톡뿐 아니라 파이어폭스·터미널 등 **모든 앱에서** 한영 전환 자체가 안 되는 상황.
+
+**원인 (Ubuntu 24.04 / ibus-hangul 1.5.5에서 확인):** ibus-hangul 엔진의 한영 전환키
+설정값(`switch-keys`)이 파싱 불가능한 리스트 형태로 깨져 있었습니다:
+
+```
+switch-keys = "['Hangul', 'Shift+space'],Alt_R"   # ← 엔진이 못 읽음 → 어떤 키로도 전환 안 됨
+```
+
+여기에 더해 **전역 토글**(`general.hotkey.triggers`)에도 `Hangul`이 중복 등록돼 있어,
+한영키가 엔진까지 도달하기 전에 전역 토글이 키를 가로채 IME on/off만 토글했습니다.
+엔진 시작모드는 `latin`(영문)이라 결국 **계속 영문에 머무는** 상태가 됩니다.
+
+**해결:** `switch-keys`를 정상값으로 복구하고, 한영 전환은 엔진이 전담하도록 전역
+토글에서 `Hangul`을 제거합니다.
+
+```bash
+chmod +x fix-hangul-key.sh
+./fix-hangul-key.sh        # 현재값 백업 → 설정 복구 → ibus 재시작
+```
+
+스크립트가 하는 일(수동으로 해도 동일):
+
+```bash
+gsettings set org.freedesktop.ibus.engine.hangul switch-keys 'Hangul,Shift+space'
+gsettings set org.freedesktop.ibus.general.hotkey triggers "['<Super>space']"
+ibus restart
+```
+
+적용 후 아무 입력창에서 **우측 Alt(한영키)**로 한↔영이 전환되면 성공입니다. 여전히
+안 되면 로그아웃 후 재로그인하세요(실행 중이던 앱들이 이전 ibus 연결을 물고 있음).
+
+> 전제: 우측 Alt가 `Hangul` 키심을 내보내야 합니다(`kr` 레이아웃 기준). 안 되어 있으면
+> 한 번만: `gsettings set org.gnome.desktop.input-sources xkb-options "['korean:ralt_hangul']"`
+>
+> 참고: 위쪽 "카카오톡에서만" 항목의 *"ibus 데몬을 재시작하지 마세요"* 경고와 헷갈리지
+> 마세요. 그건 ibus가 멀쩡한데 카카오톡만 안 될 때 얘기입니다. 여기는 ibus 설정 **자체가
+> 깨진** 경우라, 설정을 고치고 데몬을 재시작하는 게 올바른 해법입니다.
 
 ## 재시작 후 창이 검게/짤려/안 보일 때
 
